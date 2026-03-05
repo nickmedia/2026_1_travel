@@ -99,8 +99,7 @@ def api_create_user():
 def show_login():
     try:
         user = session.get("user", "")
-        if not user:
-            return render_template("page_login.html", user=user, x=x)
+        if not user: return render_template("page_login.html", user=user, x=x)
         return redirect ("/profile")
     except Exception as ex:
         ic(ex)
@@ -165,8 +164,7 @@ def api_login():
 def show_profile():
     try:
         user = session.get("user", "")
-        if not user:
-            return redirect ("/login")
+        if not user: return redirect ("/login")
         return render_template("page_profile.html", user=user, x=x)
     except Exception as ex:
         ic(ex)
