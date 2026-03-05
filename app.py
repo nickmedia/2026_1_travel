@@ -14,6 +14,8 @@ app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
+
+
 ##############################
 @app.get("/signup")
 @x.no_cache
@@ -44,9 +46,7 @@ def api_create_user():
         cursor.execute(q, (user_pk, user_first_name, user_last_name, user_email, user_hashed_password, user_created_at))
         db.commit()
 
-
         form_signup = render_template("___form_signup.html", x=x)
-
 
         return f"""
             <browser mix-replace="form">{form_signup}</browser>
@@ -99,11 +99,13 @@ def api_create_user():
 def show_login():
     try:
         user = session.get("user", "")
-        if not user: return render_template("page_login.html", user=user, x=x)
-        return redirect ("/profile")
+        if not user: 
+            return render_template("page_login.html", user=user, x=x)
+        return redirect("/profile")
     except Exception as ex:
         ic(ex)
         return "ups"
+
 
 ##############################
 @app.post("/api-login")
@@ -118,23 +120,22 @@ def api_login():
         user = cursor.fetchone()
         if not user:
             error_message = "Invalid credentials 1"
-            ___tip = render_template("___tip.html", status="error", message=error_message)        
-            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
-        
-        if not check_password_hash(user["user_password"], user_password):
-            error_message = "Invalid credentials 2"
-            ___tip = render_template("___tip.html", status="error", message=error_message)        
+            ___tip = render_template("___tip.html", status="error", message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
-        
+        if not check_password_hash(user["user_password"], user_password):
+            error_message = "Invalid credentials 2"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400            
+
         user.pop("user_password")
         session["user"] = user
-      
 
         return f"""<browser mix-redirect="/profile"></browser>"""
 
     except Exception as ex:
         ic(ex)
+
 
         if "company_exception user_email" in str(ex):
             error_message = f"user email invalid"
@@ -156,15 +157,13 @@ def api_login():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-
-
 ##############################
 @app.get("/profile")
 @x.no_cache
 def show_profile():
     try:
         user = session.get("user", "")
-        if not user: return redirect ("/login")
+        if not user: return redirect("/login")
         return render_template("page_profile.html", user=user, x=x)
     except Exception as ex:
         ic(ex)
