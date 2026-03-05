@@ -3,6 +3,8 @@ import x
 import uuid
 import time
 from flask_session import Session
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 
 from icecream import ic
 ic.configureOutput(prefix=f'______ | ', includeContext=True)
@@ -17,7 +19,7 @@ Session(app)
 def show_signup():
     try:
         user = session.get("user", "")
-        return render_template("page_signup.html", user=user)
+        return render_template("page_signup.html", user=user, x=x)
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -30,9 +32,18 @@ def api_create_user():
         user_last_name = x.validate_user_last_name()
         user_email = x.validate_user_email()
         user_password = x.validate_user_password()
+        user_hashed_password = generate_password_hash(user_password)
+        # ic(user_hashed_password) # 'scrypt:32768:8:1$V0NLEqHQsgKyjyA7$3a9f6420e4e9fa7a4e4ce6c89927e7dcb532e5f557aee6309277243e5882cc4518c94bfd629b61672553362615cd5d668f62eedfe4905620a8c9bb7db573de31'
 
+        user_pk = uuid.uuid4().hex
+        user_created_at = int(time.time())
 
-        return "ok"
+        db, cursor = x.db()
+        q = "INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s)"
+        cursor.execute(q, (user_pk, user_first_name, user_last_name, user_email, user_hashed_password, user_created_at))
+        db.commit()
+
+        return f"""<browser mix-redirect="/login"></browser>"""
 
     except Exception as ex:
         ic(ex)
@@ -57,9 +68,17 @@ def api_create_user():
             ___tip = render_template("___tip.html", status="error", message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
+        if "Duplicate entry" in str(ex) and "user_email" in str(ex):
+            error_message = "Email already exists"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        # Worst case
+        error_message = "System under maintenance"
+        ___tip = render_template("___tip.html", status="error", message=error_message)        
+        return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 500
 
 
-        return "ups"
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
