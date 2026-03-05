@@ -1,23 +1,7 @@
 {% include "_header.html" %}
 
 <main>
-    <form mix-post="/api-create-user" autocomplete="off">
-        
-        <div>
-            <label for="">
-                First name <span>{{ x.USER_FIRST_NAME_MIN }} to {{ x.USER_FIRST_NAME_MAX }} characters</span>
-            </label>
-            <input name="user_first_name" type="text" placeholder="user first name" value="" 
-            mix-validate="{{x.REGEX_USER_FIRST_NAME}}">
-        </div>
-
-        <div>
-            <label for="">
-                Last name <span>{{ x.USER_LAST_NAME_MIN }} to {{ x.USER_LAST_NAME_MAX }} characters</span>
-            </label>
-            <input name="user_last_name" type="text" placeholder="user last name" value="" 
-            mix-validate="{{x.REGEX_USER_LAST_NAME}}">
-        </div>
+    <form mix-post="/api-login" autocomplete="off">
 
         <div>
             <label for="">
@@ -38,7 +22,7 @@
 
 
         <button>
-            Signup
+            Login
         </button>
     </form>
 </main>
